@@ -28,6 +28,7 @@ Expected project URL after enabling Pages: `https://tokenwave-ai.github.io/TestE
 - `index.html`, `style.css`, `script.js`: page, responsive styling, model tables, filters, cases, citation copying.
 - `assets/paper.pdf`: user-supplied paper dated October 25, 2026.
 - `assets/logo.svg` / `assets/logo.png`: transparent horizontal logo for a README or website.
+- `assets/logo-display.png`: the same logo with transparent outer margins removed for alignment on the homepage.
 - `assets/mascot.svg` / `assets/mascot.png`: standalone bear extracted from the approved logo.
 - `assets/favicon.png`: small bear portrait for browser tabs.
 - `assets/hero.svg`: original workbench illustration.
