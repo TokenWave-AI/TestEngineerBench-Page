@@ -23,6 +23,10 @@ All site resources use relative paths, supporting both root domains and GitHub P
 
 Expected project URL after enabling Pages: `https://tokenwave-ai.github.io/TestEngineerBench-Page/`.
 
+### Visual system
+
+The site follows the supplied TokenWave research guidelines: white/black/gray surfaces, blue links, limited lime emphasis, 1120px content width, 32/24/18px headings and 14px body text. Franie Test/Franie and Source Han Sans SC/Noto Sans SC are preferred font families, with a system sans-serif fallback; font binaries were not supplied. The approved bear artwork is preserved. `assets/tokenwave.svg` is the unmodified horizontal black-wordmark brand asset, used in affiliations and the footer.
+
 ### Content and assets
 
 - `index.html`, `style.css`, `script.js`: page, responsive styling, model tables, filters, cases, citation copying.
@@ -46,4 +50,4 @@ Copy `assets/logo.png` to the destination repository first.
 
 All model numbers are transcribed from Tables 3 and 5 of the supplied PDF, not live leaderboard measurements. Appendix D supplies the Folium, Textual, and Superset case studies. Folium is explicitly labeled an archived evaluation. Displayed code excerpts omit surrounding setup; the Textual assertion is shortened and labeled accordingly. The footer, paper links, and metric notes preserve source context. Update `models`, `tracks`, and `cases` in `script.js` when revising results. Code/data resources are labeled coming soon until official destinations exist.
 
-Visual direction is inspired by [Cambrian-S](https://cambrian-mllm.github.io/cambrian-s/): warm paper, serif typography, restrained color, and editorial figures. Benchmark-first organization also draws on [SWE-sweep](https://swesweep.com/). The bear follows the character in the paper’s Figure 1. The final logo was supplied and approved by the project author, with Active-SWE serving as a finish and lettering reference.
+The initial editorial layout drew on [Cambrian-S](https://cambrian-mllm.github.io/cambrian-s/); typography, UI and colors now follow the supplied TokenWave research guidelines. Benchmark-first organization also draws on [SWE-sweep](https://swesweep.com/). The bear follows the character in the paper’s Figure 1. The final logo was supplied and approved by the project author, with Active-SWE serving as a finish and lettering reference.
