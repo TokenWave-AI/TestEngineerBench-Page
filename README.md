@@ -53,3 +53,5 @@ All model numbers are transcribed from Tables 3 and 5 of the supplied PDF, not l
 The initial editorial layout drew on [Cambrian-S](https://cambrian-mllm.github.io/cambrian-s/); typography, UI and colors now follow the supplied TokenWave research guidelines. Benchmark-first organization also draws on [SWE-sweep](https://swesweep.com/). The bear follows the character in the paper’s Figure 1. The final logo was supplied and approved by the project author, with Active-SWE serving as a finish and lettering reference.
 
 The Hugging Face button icon is sourced from [Simple Icons](https://github.com/simple-icons/simple-icons/blob/develop/icons/huggingface.svg) (CC0); GitHub and Hugging Face names and marks belong to their respective owners.
+
+Homepage prose follows the descriptive project-page approach of [OSWorld-Science](https://discoailab.github.io/osworld-science-page/). Benchmark definitions, metrics and case evidence remain grounded in the supplied paper; model results and quoted execution excerpts are unchanged by the editorial revision.

@@ -95,3 +95,6 @@ footer{font-size:12px;line-height:18px;padding:32px 0;gap:24px;color:var(--muted
 .topbar .tokenwave-brand img{display:block;width:168px;height:auto}@media(max-width:640px){.topbar .tokenwave-brand img{width:140px}}
 
 .resource-actions{gap:12px}.button-icon{display:block;width:18px;height:18px;flex:0 0 18px}.button.release-pending{background:#fff;color:#737780;border-color:#c7cbd2;cursor:default}.button.release-pending:hover{background:#fff;color:#737780;border-color:#c7cbd2}.release-note{margin-top:12px}
+
+/* Research summary uses prose instead of promotional feature labels. */
+.hero-question{font-size:16px;line-height:26px;color:var(--ink)}.premises p{display:block;font-size:14px;line-height:22px;color:var(--muted)}.benchmark-description{max-width:880px;margin-bottom:32px}.finding-intro{max-width:880px}.art-note{text-transform:none;letter-spacing:0}
