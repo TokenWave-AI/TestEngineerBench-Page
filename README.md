@@ -5,7 +5,7 @@
 
 TestEngineerBench evaluates requirements-driven testing and defect discovery across **100 instances**, **78 Python repositories**, **16 application categories**, and **531 recorded defect occurrences**. Agents receive a product requirements document, a prerelease repository, and a configured execution environment, without issue descriptions or investigation targets.
 
-This repository contains the project website, not the benchmark implementation. It presents the two independent tasks, sortable model results, and three trajectory case studies with direct references to the paper.
+This repository contains the project website, not the benchmark implementation. It presents the original abstract and Figure 1, sortable model results, interactive dataset statistics, seven verbatim findings, a complete Folium task input with output excerpts, and six trajectory case studies.
 
 ### Local preview
 
@@ -21,7 +21,7 @@ npm run check
 
 All site resources use relative paths, supporting both root domains and GitHub Pages project paths. The included GitHub Actions workflow skips private repositories and deploys a curated static artifact on pushes to `main` or manual dispatch. Enable **Settings → Pages → Source → GitHub Actions** first. A private repository requires a GitHub plan that supports Pages for private repositories; this project does not change repository visibility.
 
-Expected project URL after enabling Pages: `https://tokenwave-ai.github.io/TestEngineerBench-Page/`.
+Published project URL: `https://tokenwave-ai.github.io/TestEngineerBench-Page/`.
 
 ### Visual system
 
@@ -29,7 +29,11 @@ The site follows the supplied TokenWave research guidelines: white/black/gray su
 
 ### Content and assets
 
-- `index.html`, `style.css`, `script.js`: page, responsive styling, model tables, filters, cases, citation copying.
+- `index.html`, `style.css`, `script.js`: page, responsive styling, model tables, linked category/repository filters, distribution charts, findings and case tabs, citation copying.
+- `assets/paper-content.js`: manuscript excerpts, complete PRD, instruction templates, six trajectory cases, and the 78-repository inventory.
+- `assets/figure1.svg`: the paper’s original Figure 1, copied from its self-contained source SVG.
+- `assets/folium-prd.md`: the complete Folium episode-0001 PRD, as reproduced in Appendix C.
+- `assets/wordmark-option-a.svg`: selected blue/black lettering with a lime underline.
 - `assets/paper.pdf`: user-supplied paper dated October 25, 2026.
 - `assets/logo.svg` / `assets/logo.png`: transparent horizontal logo for a README or website.
 - `assets/logo-display.png`: the full logo with transparent outer margins removed.
@@ -50,10 +54,16 @@ Copy `assets/logo.png` to the destination repository first.
 
 ### Results and provenance
 
-All model numbers are transcribed from Tables 3 and 5 of the supplied PDF, not live leaderboard measurements. Appendix D supplies the Folium, Textual, and Superset case studies. Folium is explicitly labeled an archived evaluation. Displayed code excerpts omit surrounding setup; the Textual assertion is shortened and labeled accordingly. The footer, paper links, and metric notes preserve source context. Update `models`, `tracks`, and `cases` in `script.js` when revising results. Code/data resources are labeled coming soon until official destinations exist.
+All model numbers are transcribed from Tables 3 and 5 of the supplied PDF, not live leaderboard measurements. The abstract, seven finding paragraphs, full PRD, code, narration and analysis come from the matching manuscript (`TestEngineerBench-Paper/main.tex`). Only TeX/Markdown markup and spacing are converted for the web. Findings retain their original sentences; display metrics repeat their reported values. The six focused cases preserve the paper’s archived-evaluation labels where applicable.
+
+Appendix C supplies the complete Folium episode-0001 PRD, both task instruction templates, six Task 1 test excerpts and the Task 2 report excerpt. Outputs are excerpts exactly as qualified in the paper; the PRD is complete. Task 1 and Task 2 are independent runs. The Task 2 panel distinguishes 15 agent-reported findings from the five reference bugs credited by the evaluator. Appendix D supplies all six focused trajectory cases, including the original analysis.
+
+Dataset charts use Figure 2, Table 2 and the current repository inventory: 78 repositories, 100 instances, 531 recorded defect occurrences and 16 application categories. Category buttons filter the repository chart and inventory. Repository bars can switch between recorded defects, source kLOC and instances. The defects-per-instance histogram switches between exact bins and the paper’s grouped bins; it remains benchmark-wide because the paper does not publish category-by-defect joint counts. Source kLOC is a per-repository median for repository bars, while the 80.4k headline is the per-instance median from Table 2. Older release-audit files are not used.
+
+Update `models` and `tracks` in `script.js` for leaderboard revisions and `assets/paper-content.js` for manuscript revisions, keeping the static abstract and caption in `index.html` synchronized. Code/data resources remain coming soon until official destinations exist.
 
 The initial editorial layout drew on [Cambrian-S](https://cambrian-mllm.github.io/cambrian-s/); typography, UI and colors now follow the supplied TokenWave research guidelines. Benchmark-first organization also draws on [SWE-sweep](https://swesweep.com/). The bear follows the character in the paper’s Figure 1. The final logo was supplied and approved by the project author, with Active-SWE serving as a finish and lettering reference.
 
 The Hugging Face button icon is sourced from [Simple Icons](https://github.com/simple-icons/simple-icons/blob/develop/icons/huggingface.svg) (CC0); GitHub and Hugging Face names and marks belong to their respective owners.
 
-Homepage prose follows the descriptive project-page approach of [OSWorld-Science](https://discoailab.github.io/osworld-science-page/). Benchmark definitions, metrics and case evidence remain grounded in the supplied paper; model results and quoted execution excerpts are unchanged by the editorial revision.
+Content organization draws on [OSWorld-Science](https://discoailab.github.io/osworld-science-page/). The page follows statistics → Abstract → Figure 1 → Leaderboard → dataset charts → Key findings → Case studies; research prose and case evidence come from the paper.
