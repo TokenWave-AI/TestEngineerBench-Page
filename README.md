@@ -40,7 +40,7 @@ The site follows the supplied TokenWave research guidelines: white/black/gray su
 - `assets/wordmark.png`: original lettering extracted from the approved logo.
 - `assets/wordmark-brand.svg`: self-contained black/brand-blue title variant, preserving the original lettering silhouette.
 - `assets/mascot.svg` / `assets/mascot.png`: standalone bear extracted from the approved logo.
-- `assets/favicon.png`: small bear portrait for browser tabs.
+- `assets/tokenwave-favicon.svg` / `assets/favicon.png`: the official blue TokenWave symbol for browser tabs, with a 64px PNG fallback.
 - `assets/hero.svg`: original workbench illustration.
 - `assets/social.png`: 1200 × 630 social preview.
 
