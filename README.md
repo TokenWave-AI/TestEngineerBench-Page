@@ -69,3 +69,18 @@ The Hugging Face button icon is sourced from [Simple Icons](https://github.com/s
 Content organization draws on [OSWorld-Science](https://discoailab.github.io/osworld-science-page/). The page follows statistics → Abstract → Figure 1 → Leaderboard → dataset charts → Key findings → Case studies; research prose and case evidence come from the paper.
 
 Font sources: [Noto Sans SC / Google Fonts](https://fonts.google.com/noto/specimen/Noto+Sans+SC), with its OFL in `assets/fonts/OFL-NotoSansSC.txt`; [Franie Test terms](https://www.thatthattype.com/test-fonts). Local trial fonts were downloaded from the Franie package on Befonts and remain excluded from publication.
+
+### Promotional film
+
+`video/TestEngineerBench-promo.mp4` is a 45-second English film (1920×1080, 24 fps, H.264/AAC), with an original synthesized score and interface cues. `video/promo-poster.png` is its cover. The warm background, typing sequence, centered interface and concise result transitions take visual cues from the supplied BackSearch reference; none of its footage or audio is reused.
+
+The Folium walkthrough uses the submitted option-forwarding assertion and evaluator outcomes from Appendix C (episode-0001, GPT-6-Astra). The repaired snapshot is an evaluator replay, not an agent-authored fix. The metrics are the paper’s seven-agent means, and the inventory counts match the current benchmark. The film uses OFL-licensed Noto Sans SC; no trial fonts are embedded. Static video font instances are derived from the same Noto webfont; the OFL is retained under `assets/fonts/`.
+
+To edit or regenerate it, use Node.js 22+ and FFmpeg:
+
+```sh
+npm --prefix video ci
+npm --prefix video run render
+```
+
+`video/render.mjs` controls timing, typography, diagrams and animation. `video/soundtrack.mjs` creates the original music and UI cues. The film is delivered as a project asset and is not automatically inserted into the homepage or posted to social media.

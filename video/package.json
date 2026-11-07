@@ -1,0 +1,1 @@
+{"name":"testengineerbench-promo","private":true,"type":"module","scripts":{"render":"node render.mjs"},"dependencies":{"fontkit":"^2.0.4","sharp":"^0.34.5"}}
