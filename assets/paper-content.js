@@ -1,4 +1,4 @@
-// Verbatim manuscript excerpts and published dataset inventory. See README for provenance.
+// Manuscript excerpts, source-backed highlights, and published dataset inventory. See README.
 const PAPER = {
   "abstract": "Autonomous software testing requires coding agents to translate functional requirements into executable tests and use the results to discover and validate defects. However, existing benchmarks evaluate coding agents on explicitly specified test generation tasks, commonly providing an issue description, a designated test entry point, or files to inspect, leaving the ability to determine what to test and where to investigate insufficiently evaluated. Relying on such clues bypasses the challenge of mapping requirements to implementations and proactively uncovering unknown defects. We propose <strong>TestEngineerBench</strong>, comprising 100 instances from 78 open source Python repositories across 16 application categories, with multiple recorded defects in each instance. Two independent tasks evaluate complementary capabilities: generating test suites and discovering defects through execution analysis. The evaluation combines test validity, defect detection, and coverage with localization precision and recall. Across seven frontier coding agents, results reveal that test validity and coverage decouple from defect exposure: agents achieve a 91.47% Head Pass Rate and 80.48% Change Focused Coverage alongside a 26.36% Fail-to-Pass Rate, while localization recall drops from 78.11% at the file level to 51.29% at the function level. Autonomous test generation improves file, function, and hunk localization recall by 4.99, 2.77, and 2.69 percentage points over relying solely on existing repository test suites.",
   "caption": "Conceptual comparison of representative benchmark settings and <strong>TestEngineerBench</strong>. <strong>(a)</strong> Issue-guided tasks provide a description of the faulty behavior. <strong>(b)</strong> Target-guided tasks specify investigation targets, such as files, functions, or entry interfaces. <strong>(c)</strong> TestEngineerBench provides a PRD, a pre-release repository, and a configured environment, leaving agents to determine what and where to test. Agents explore the repository, design and execute tests, and analyze the results to investigate multiple unknown defects. Two independent tasks evaluate test-suite quality and defect reporting.",
@@ -727,5 +727,365 @@ const PAPER = {
       "title": "Task 2: Defect Discovery and Reporting",
       "text": "You are an experienced software test engineer applying a systematic test-execution and bug-localization approach.\nYour task is to inspect one repository and its neutral PRD, write and run focused temporary test cases against the provided repository,\nidentify source-grounded software problems, and produce a report.\n\nYou are given:\n- PRD document\n- The visible repository source\n- The repository's declared dependencies\n\nYour tasks:\n1. Read the PRD and inspect the repository source, public interfaces, dependencies, and relevant documentation.\n2. Design a test suite, execute it, analyze the run results, and try to uncover all hidden defects in the repository. It may cover:\n   - Basic functionality with valid inputs and expected outputs.\n   - Boundary conditions and edge cases.\n   - Invalid inputs and error handling.\n   - Potential issues with dependency interactions.\n3. Write executable test code using Pytest. Base assertions on intended behavior so that correct implementations pass and incorrect implementations fail.\n4. If there are issues with the runtime environment, you may perform fixes yourself, such as installing dependencies via pip install.\n5. Save the complete executable test suite and any required test data under `/workspace/submission/`.\n6. Use the environment instructions to configure the provided environment and run the complete test suite.\n   Analyze observed results against expected behavior, investigate failures, and reproduce suspected bugs.\n7. Trace confirmed failures to their causal source files, functions, and lines. Write a complete report\n   to `/workspace/submission/report.json`, including test results, reproduction evidence, and root-cause analysis.\n\n## Environment\n\nThe Harbor image exposes the model inputs at fixed paths. Read the PRD first from `/workspace/prd.md`, then inspect\nand run the repository from `/workspace/repo`:\n\n    cd /workspace/repo\n\nUse the dependencies configured by `environment/Dockerfile`; do not recreate or replace the task environment (you can still fix the environment via pip install), and do not look for the repository or PRD beside the task directory. If setup has an infrastructure problem, record it in `constraints_and_disclosures` and do not claim it is a product failure without an independent reproduction.\n\n## Output Format\n\nThe output is the complete executable test suite, execution evidence, and `/workspace/submission/report.json`.\nWhen a targeted reproduction script is useful, include `/workspace/submission/repro.sh`.\nThe report's top-level structure must match this format:\n\n```json\n{\n  \"title\": \"short problem title\",\n  \"status\": \"confirmed|suspected|blocked\",\n  \"severity\": \"critical|high|medium|low|unknown\",\n  \"test_results\": [\n    {\n      \"scope\": \"test scope\",\n      \"cwd\": \"working directory\",\n      \"command\": \"exact command\",\n      \"exit_code\": 0,\n      \"outcome\": \"what happened\",\n      \"observed\": \"relevant output or failure\",\n      \"evidence\": \"relative raw evidence path\"\n    }\n  ],\n  \"reproduction\": {\n    \"script\": \"repro.sh\",\n    \"command\": \"/workspace/submission/repro.sh\",\n    \"uses_authored_tests\": true,\n    \"steps\": [\"reproduction step\"],\n    \"expected\": \"documented or correct behavior\",\n    \"actual\": \"observed incorrect behavior\",\n    \"evidence\": \"relative raw evidence path\",\n    \"environment_note\": \"environment limitation or intervention\"\n  },\n  \"locations\": [\n    {\n      \"path\": \"repository-relative/source.py\",\n      \"functions\": [\n        {\"name\": \"Class.method\"}\n      ],\n      \"lines\": [42, 43],\n      \"finding\": \"source-grounded causal finding\"\n    }\n  ],\n  \"root_cause\": {\n    \"summary\": \"causal explanation\",\n    \"mechanism\": [\"causal step\"],\n    \"required_guard\": \"required behavioral or code guard, when applicable\",\n    \"evidence\": [\"relative evidence path\"]\n  },\n  \"impact\": \"user-visible or system impact\",\n  \"constraints_and_disclosures\": [\"setup, dependency, intervention, or scope disclosure\"]\n}\n```\n\nUse one JSON report object to describe the bugs you identify. Preserve exact commands, exit codes, outcomes, observed failures, and evidence paths. If an authored test run is blocked by the environment, record it as infrastructure evidence and do not claim it is a product failure without an independent reproduction.\n\n## Localization Detail Requirements\n\nThe `locations` array must report every finding at all three localization granularities:\n\n- File: `path` is the repository-relative source file.\n- Function: include a `functions` array under that file, with each function's exact `name`. Use a qualified name such as `Class.method` when applicable; use `<module>` for module-level code.\n- Code line: Each file entry must include a `lines` array containing the 1-based source-code line numbers of the exact lines relevant to the bug. Do not use vague ranges when precise line numbers can be identified.\n\nThe `path`, `functions`, and `lines` fields must be siblings within each file entry. The `lines` array describes relevant locations throughout that file, including locations outside function bodies. Do not nest `lines` inside individual function entries.\n\nUse this shape (and repeat it for every affected file):\n\n```json\n\"locations\": [\n  {\n    \"path\": \"pkg/module.py\",\n    \"functions\": [\n      {\"name\": \"<module>\"},\n      {\"name\": \"Class.method\"}\n    ],\n    \"lines\": [5, 42, 43]\n  }\n]\n```\n\nAlways provide the file, function, and exact line details.\n\nDo not produce a separate failure analysis or prose report in place of submission/report.json."
     }
-  ]
+  ],
+  "highlights": [
+    {
+      "label": "Test validity & detection",
+      "points": [
+        [
+          "Validity and exposure",
+          "Across seven agents, mean HP reaches 91.47%, while mean F2P is 26.36%."
+        ],
+        [
+          "High coverage",
+          "Even in the 80–100% CFG interval, mean F2P ranges from 24.24% to 37.82%."
+        ],
+        [
+          "Root-cause localization",
+          "Mean localization recall falls from 78.11% for files to 51.29% for functions."
+        ]
+      ]
+    },
+    {
+      "label": "Distinct bug localization",
+      "points": [
+        [
+          "Distinct bug recovery",
+          "Agents localize 33.14–49.04% of reference bugs across the evaluated models."
+        ],
+        [
+          "Across file boundaries",
+          "Localization falls to 2.00–7.84% for multi-file bugs, versus 40.63–59.05% for single-file bugs."
+        ],
+        [
+          "Coexisting defects",
+          "Every evaluable bug is localized in only 4.00–11.00% of instances."
+        ]
+      ]
+    },
+    {
+      "label": "Discovery by defect type",
+      "points": [
+        [
+          "Shared blind spots",
+          "Mean hunk recall is 40.56% for incomplete output and 50.23% for incomplete data processing."
+        ],
+        [
+          "Input validation",
+          "The missing-input-validation cohort has mean hunk recall of 51.32%."
+        ],
+        [
+          "Within known files",
+          "Of 46 complete-file-recall records in that cohort, 95.65% still omit reference functions."
+        ]
+      ]
+    },
+    {
+      "label": "Failure mechanisms",
+      "points": [
+        [
+          "Test oracles",
+          "Assertion mismatches and misconfigured mocks account for 31.6% and 37.5% of reviewed Task 1 failure mechanisms."
+        ],
+        [
+          "Causal tracing",
+          "Premature search termination accounts for 36.0% of reviewed localization failure mechanisms; evidence underuse accounts for 30.9%."
+        ],
+        [
+          "Reporting",
+          "Symptoms reported as causes (25.0%) and conservative omissions (19.9%) leave defect locations unreported."
+        ]
+      ]
+    },
+    {
+      "label": "Effect of new tests",
+      "points": [
+        [
+          "Recall gains",
+          "Agent-authored tests improve file, function, and hunk recall by 4.99, 2.77, and 2.69 percentage points."
+        ],
+        [
+          "Uneven improvements",
+          "Function recall improves in 31% of instances and hunk recall in 35%; the median paired change is zero."
+        ],
+        [
+          "Precision tradeoff",
+          "Mean precision decreases at all three granularities in the same GPT-5.6-Sol comparison."
+        ]
+      ]
+    }
+  ],
+  "cohorts": [
+    {
+      "name": "Incomplete data processing",
+      "values": [
+        76.83,
+        72.03,
+        50.88,
+        50.58,
+        50.23,
+        65.7
+      ]
+    },
+    {
+      "name": "Missing input validation",
+      "values": [
+        81.87,
+        74.95,
+        52.54,
+        53.59,
+        51.32,
+        70.36
+      ]
+    },
+    {
+      "name": "Incomplete error handling",
+      "values": [
+        76.51,
+        73.38,
+        51.85,
+        53.88,
+        50.62,
+        68.62
+      ]
+    },
+    {
+      "name": "Incomplete configuration",
+      "values": [
+        73.97,
+        80.3,
+        52.08,
+        57.37,
+        44.95,
+        69.66
+      ]
+    },
+    {
+      "name": "Incomplete output",
+      "values": [
+        71.89,
+        76.13,
+        48.17,
+        59.59,
+        40.56,
+        65.26
+      ]
+    },
+    {
+      "name": "Incorrect data processing",
+      "values": [
+        79.04,
+        75.09,
+        54.71,
+        54.28,
+        52.89,
+        67.95
+      ]
+    },
+    {
+      "name": "Incorrect input validation",
+      "values": [
+        81.89,
+        76.85,
+        56.35,
+        50.37,
+        51.46,
+        69.45
+      ]
+    },
+    {
+      "name": "Incorrect path / resource",
+      "values": [
+        87.62,
+        72.0,
+        66.52,
+        48.97,
+        59.95,
+        66.81
+      ]
+    },
+    {
+      "name": "Incorrect output",
+      "values": [
+        76.08,
+        71.71,
+        52.54,
+        56.16,
+        51.83,
+        66.54
+      ]
+    },
+    {
+      "name": "Incorrect configuration",
+      "values": [
+        85.65,
+        76.06,
+        59.89,
+        49.6,
+        55.08,
+        67.65
+      ]
+    },
+    {
+      "name": "Incorrect regular expression",
+      "values": [
+        76.12,
+        79.55,
+        59.0,
+        58.41,
+        54.38,
+        71.53
+      ]
+    },
+    {
+      "name": "Performance / resource issue",
+      "values": [
+        81.15,
+        84.4,
+        54.87,
+        62.57,
+        53.67,
+        82.28
+      ]
+    },
+    {
+      "name": "Typo / symbol error",
+      "values": [
+        87.69,
+        73.58,
+        75.75,
+        50.24,
+        79.46,
+        69.34
+      ]
+    },
+    {
+      "name": "Variable initialization error",
+      "values": [
+        81.43,
+        85.38,
+        57.28,
+        63.88,
+        49.54,
+        76.01
+      ]
+    },
+    {
+      "name": "Generic data-operation error",
+      "values": [
+        98.89,
+        84.95,
+        77.41,
+        72.67,
+        62.84,
+        80.66
+      ]
+    },
+    {
+      "name": "Missing type conversion",
+      "values": [
+        80.0,
+        66.36,
+        66.33,
+        48.73,
+        60.25,
+        58.02
+      ]
+    },
+    {
+      "name": "Loop / control-flow error",
+      "values": [
+        94.4,
+        73.82,
+        63.92,
+        62.32,
+        66.45,
+        70.28
+      ]
+    }
+  ],
+  "failureMechanisms": {
+    "tests": [
+      [
+        "Misconfigured mocks",
+        37.5
+      ],
+      [
+        "Assertion mismatches",
+        31.6
+      ],
+      [
+        "API / parameter errors",
+        22.8
+      ],
+      [
+        "Invalid input / setup",
+        7.4
+      ],
+      [
+        "Runtime exceptions",
+        3.7
+      ],
+      [
+        "Syntax / collection",
+        1.5
+      ]
+    ],
+    "localization": [
+      [
+        "Premature termination",
+        36.0
+      ],
+      [
+        "Evidence underuse",
+        30.9
+      ],
+      [
+        "Dependency truncation",
+        25.0
+      ],
+      [
+        "Symptoms as causes",
+        25.0
+      ],
+      [
+        "Conservative omissions",
+        19.9
+      ],
+      [
+        "Incorrect granularity",
+        4.4
+      ]
+    ]
+  },
+  "pairedTesting": {
+    "recall": [
+      [
+        74.81,
+        79.8
+      ],
+      [
+        49.82,
+        52.59
+      ],
+      [
+        49.53,
+        52.22
+      ]
+    ],
+    "precision": [
+      [
+        78.0,
+        75.26
+      ],
+      [
+        60.16,
+        58.55
+      ],
+      [
+        73.59,
+        70.34
+      ]
+    ]
+  }
 };

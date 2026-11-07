@@ -5,7 +5,7 @@
 
 TestEngineerBench evaluates requirements-driven testing and defect discovery across **100 instances**, **78 Python repositories**, **16 application categories**, and **531 recorded defect occurrences**. Agents receive a product requirements document, a prerelease repository, and a configured execution environment, without issue descriptions or investigation targets.
 
-This repository contains the project website, not the benchmark implementation. It presents the original abstract and Figure 1, sortable model results, interactive dataset statistics, five RQ groups of verbatim findings, a complete Folium task input with output excerpts, and six trajectory case studies.
+This repository contains the project website, not the benchmark implementation. It presents the original abstract and Figure 1, sortable model results, interactive dataset statistics, five RQ groups with concise takeaways and evidence charts, a complete Folium task input with output excerpts, and six trajectory case studies.
 
 ### Local preview
 
@@ -54,11 +54,11 @@ Copy `assets/logo.png` to the destination repository first.
 
 ### Results and provenance
 
-All model numbers are transcribed from Tables 3 and 5 of the supplied PDF, not live leaderboard measurements. The abstract, 15 finding paragraphs across the five RQ sections, full PRD, code, narration and analysis come from the matching manuscript (`TestEngineerBench-Paper/main.tex`). Only TeX/Markdown markup and spacing are converted for the web. Findings retain their original sentences; display metrics repeat their reported values. The six focused cases preserve the paper’s archived-evaluation labels where applicable.
+All model numbers are transcribed from Tables 3 and 5 of the supplied PDF, not live leaderboard measurements. The abstract, full PRD, code, narration and case analysis come from the matching manuscript (`TestEngineerBench-Paper/main.tex`). Key Findings now condenses each RQ into three source-backed points and two chart views, rather than reproducing every analysis paragraph. The original RQ excerpts remain in `assets/paper-content.js` for provenance. Chart values come from Tables 3, 5, 6 and 7 and the reported RQ4 mechanism shares; no budget experiments or model results are synthesized. The six focused cases preserve the paper’s archived-evaluation labels where applicable.
 
 Appendix C supplies the complete Folium episode-0001 PRD, both task instruction templates, six Task 1 test excerpts and the Task 2 report excerpt. Outputs are excerpts exactly as qualified in the paper; the PRD is complete. Task 1 and Task 2 are independent runs. The Task 2 panel distinguishes 15 agent-reported findings from the five reference bugs credited by the evaluator. Appendix D supplies all six focused trajectory cases, including the original analysis.
 
-Dataset charts use Figure 2, Table 2 and the current repository inventory: 78 repositories, 100 instances, 531 recorded defect occurrences and 16 application categories. The multicolor category donut and its legend filter the repository chart and inventory. Colors come from the supplied chart palette and stay consistent in repository bars. Repository bars can switch between recorded defects, source kLOC and instances. The defects-per-instance histogram shows the paper’s exact counts without a grouping selector; it remains benchmark-wide because the paper does not publish category-by-defect joint counts. Source kLOC is a per-repository median for repository bars, while the 80.4k headline is the per-instance median from Table 2. Older release-audit files are not used.
+Dataset charts use Figure 2, Table 2 and the current repository inventory: 78 repositories, 100 instances, 531 recorded defect occurrences and 16 application categories. Hovering or focusing a category expands its donut segment and updates the center count, legend, repository chart and inventory. The last preview stays active within the statistics section and resets on exit; touch users can tap. Chart nodes stay mounted to avoid focus frames and hover flicker. Colors come from the supplied chart palette and stay consistent in repository bars. Repository bars can switch between recorded defects, source kLOC and instances. The defects-per-instance histogram shows the paper’s exact counts without a grouping selector; it remains benchmark-wide because the paper does not publish category-by-defect joint counts. Source kLOC is a per-repository median for repository bars, while the 80.4k headline is the per-instance median from Table 2. Older release-audit files are not used.
 
 Update `models` and `tracks` in `script.js` for leaderboard revisions and `assets/paper-content.js` for manuscript revisions, keeping the static abstract and caption in `index.html` synchronized. Code/data resources remain coming soon until official destinations exist.
 
@@ -83,4 +83,6 @@ npm --prefix video ci
 npm --prefix video run render
 ```
 
-`video/render.mjs` controls timing, typography, diagrams and animation. `video/soundtrack.mjs` creates the original music and UI cues. The film is delivered as a project asset and is not automatically inserted into the homepage or posted to social media.
+`video/render.mjs` controls timing, typography, diagrams and animation. `video/soundtrack.mjs` creates the original music and UI cues. The homepage embeds the film after Figure 1 with native controls, a poster and no autoplay. The Pages workflow publishes only the MP4 and poster from `video/`; the film is not posted to social media.
+
+Interactive presentation: tab indicators slide between selected buttons, panel changes fade in, and evidence/repository bars animate from zero. Animations respect reduced-motion preferences. RQ chart switches cover quality/localization, aggregate/per-model bug localization, function/hunk recall by defect type, test/localization mechanisms, and paired recall/precision. Mechanism shares are independent reported percentages, not a normalized partition.

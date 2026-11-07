@@ -23,14 +23,38 @@ function renderResults(){
  document.getElementById('results-body').innerHTML=filtered.length?filtered.map(m=>`<tr><td class="model">${m.name}<small>${m.harness} · ${m.family}</small></td>${m[activeTrack].map((n,i)=>`<td class="${n===maxima[i]&&!(activeTrack==='tests'&&i===4)?'best':''}">${n.toFixed(2)}</td>`).join('')}</tr>`).join(''):`<tr class="no-results"><td colspan="${track.headers.length+1}">No models match your search.</td></tr>`;
  document.getElementById('metric-note').textContent=track.note;
 }
-document.getElementById('results-head').addEventListener('click',event=>{const button=event.target.closest('[data-sort]');if(!button)return;const next=Number(button.dataset.sort);ascending=next===sortColumn?!ascending:false;sortColumn=next;renderResults();document.querySelector(`[data-sort="${next}"]`).focus();});
+document.getElementById('results-head').addEventListener('click',event=>{const button=event.target.closest('[data-sort]');if(!button)return;const next=Number(button.dataset.sort);ascending=next===sortColumn?!ascending:false;sortColumn=next;renderResults();animatePanel(document.getElementById('results-body'));document.querySelector(`[data-sort="${next}"]`).focus();});
 document.getElementById('model-search').addEventListener('input',renderResults);
+function reducedMotion(){return window.matchMedia('(prefers-reduced-motion: reduce)').matches;}
+function animatePanel(panel){
+ if(!panel||panel.hidden||reducedMotion())return;
+ panel.getAnimations().forEach(animation=>animation.cancel());
+ panel.animate([{opacity:.2,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:260,easing:'cubic-bezier(.2,.7,.2,1)'});
+}
+function syncTabIndicator(list){
+ const selected=list.querySelector('[role="tab"][aria-selected="true"]');
+ if(!selected||!list.offsetWidth||!selected.offsetWidth)return;
+ list.classList.add('motion-tabs');
+ list.style.setProperty('--tab-x',selected.offsetLeft+'px');list.style.setProperty('--tab-y',selected.offsetTop+'px');
+ list.style.setProperty('--tab-w',selected.offsetWidth+'px');list.style.setProperty('--tab-h',selected.offsetHeight+'px');
+}
+function refreshTabIndicators(){document.querySelectorAll('[role="tablist"]').forEach(syncTabIndicator);}
+function animateBars(container){
+ if(!container||reducedMotion())return;
+ container.querySelectorAll('.plot-bar,.plot-range,.repo-track i').forEach((bar,i)=>bar.animate([{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:420,delay:Math.min(i*24,150),easing:'cubic-bezier(.2,.7,.2,1)',fill:'backwards'}));
+}
 function wireTabs(selector,select){
  const buttons=[...document.querySelectorAll(selector)];
  buttons.forEach(button=>{
-  button.addEventListener('click',()=>{buttons.forEach(b=>{b.setAttribute('aria-selected',String(b===button));b.tabIndex=b===button?0:-1;});select(button);});
-  button.addEventListener('keydown',event=>{let index=buttons.indexOf(button);if(event.key==='ArrowRight')index=(index+1)%buttons.length;else if(event.key==='ArrowLeft')index=(index+buttons.length-1)%buttons.length;else if(event.key==='Home')index=0;else if(event.key==='End')index=buttons.length-1;else return;event.preventDefault();buttons[index].click();buttons[index].focus();});
+  button.addEventListener('click',()=>{
+   const changed=button.getAttribute('aria-selected')!=='true';
+   buttons.forEach(b=>{b.setAttribute('aria-selected',String(b===button));b.tabIndex=b===button?0:-1;});
+   if(changed){select(button);animatePanel(document.getElementById(button.getAttribute('aria-controls')));}
+   refreshTabIndicators();
+  });
+  button.addEventListener('keydown',event=>{let index=buttons.indexOf(button);const vertical=button.parentElement.getAttribute('aria-orientation')==='vertical';if(event.key==='ArrowRight'||(vertical&&event.key==='ArrowDown'))index=(index+1)%buttons.length;else if(event.key==='ArrowLeft'||(vertical&&event.key==='ArrowUp'))index=(index+buttons.length-1)%buttons.length;else if(event.key==='Home')index=0;else if(event.key==='End')index=buttons.length-1;else return;event.preventDefault();buttons[index].click();buttons[index].focus();});
  });
+ if(buttons.length)syncTabIndicator(buttons[0].parentElement);
 }
 wireTabs('[data-track]',button=>{activeTrack=button.dataset.track;sortColumn=tracks[activeTrack].defaultSort;ascending=false;document.getElementById('results-panel').setAttribute('aria-labelledby',button.id);renderResults();});
 function escapeHTML(value){return String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');}
@@ -48,9 +72,9 @@ function renderCategories(){
  const segments=categoryTotals.map(c=>{
   const start=angle+.006,end=angle+c.count/100*Math.PI*2-.006;angle+=c.count/100*Math.PI*2;
   const point=(r,a)=>[140+r*Math.cos(a),140+r*Math.sin(a)].map(n=>n.toFixed(3)).join(' ');
-  const large=end-start>Math.PI?1:0;
+  const large=end-start>Math.PI?1:0;const middle=(start+end)/2;
   const d=`M ${point(114,start)} A 114 114 0 ${large} 1 ${point(114,end)} L ${point(78,end)} A 78 78 0 ${large} 0 ${point(78,start)} Z`;
-  return `<path d="${d}" fill="${categoryColor(c.name)}" class="donut-segment ${selectedCategory&&selectedCategory!==c.name?'muted':''}" data-category="${escapeHTML(c.name)}" tabindex="0" role="button" aria-label="${escapeHTML(c.name)}, ${c.count} instances" aria-pressed="${selectedCategory===c.name}"><title>${escapeHTML(c.name)}: ${c.count} instances</title></path>`;
+  return `<path d="${d}" style="--segment-x:${(Math.cos(middle)*7).toFixed(2)}px;--segment-y:${(Math.sin(middle)*7).toFixed(2)}px" fill="${categoryColor(c.name)}" class="donut-segment ${selectedCategory&&selectedCategory!==c.name?'muted':''}" data-category="${escapeHTML(c.name)}" tabindex="0" role="button" aria-label="${escapeHTML(c.name)}, ${c.count} instances" aria-pressed="${selectedCategory===c.name}"><title>${escapeHTML(c.name)}: ${c.count} instances</title></path>`;
  }).join('');
  const selected=categoryTotals.find(c=>c.name===selectedCategory);
  document.getElementById('category-chart').innerHTML=`<svg viewBox="0 0 280 280" class="category-donut" role="group" aria-label="Instances across 16 application categories">${segments}<text x="140" y="139" text-anchor="middle" class="donut-total">${selected?selected.count:100}</text><text x="140" y="164" text-anchor="middle" class="donut-caption">instances</text></svg><div class="category-legend">${categoryTotals.map(c=>`<button class="category-row ${selectedCategory===c.name?'selected':''}" data-category="${escapeHTML(c.name)}" aria-pressed="${selectedCategory===c.name}" aria-label="Filter ${escapeHTML(c.name)}, ${c.count} instances"><i class="category-swatch" style="background:${categoryColor(c.name)}"></i><span>${escapeHTML(c.name).replaceAll('/',' / ')}</span><b>${c.count}</b></button>`).join('')}</div>`;
@@ -64,24 +88,34 @@ function renderRepositories(){
  document.getElementById('repository-count').textContent=`${rows.length} repositories · ${rows.reduce((s,r)=>s+r.instances,0)} instances · ${rows.reduce((s,r)=>s+r.defects,0)} recorded defect occurrences`;
  const top=rows.slice(0,8);const max=Math.max(...rows.map(r=>r[metric]));
  document.getElementById('repository-scale').innerHTML=top.map(r=>`<a href="${r.url}" target="_blank" rel="noopener" class="repo-bar" aria-label="${escapeHTML(r.repo)}, ${r[metric]} ${units[metric]}"><span>${escapeHTML(r.repo)}</span><span class="repo-track"><i style="width:${r[metric]/max*100}%;background:${categoryColor(r.category)}"></i></span><b>${r[metric].toLocaleString('en-US',{maximumFractionDigits:1})}</b></a>`).join('')+`<p class="chart-source">${rows.length>8?'Top 8 repositories · ':''}${units[metric]} · Linear scale from 0</p>`;
+ animateBars(document.getElementById('repository-scale'));
  document.getElementById('repository-body').innerHTML=rows.map(r=>`<tr><td><a href="${r.url}" target="_blank" rel="noopener">${escapeHTML(r.repo)}</a></td><td>${escapeHTML(r.category)}</td><td>${r.instances}</td><td>${r.defects}</td><td>${r.kloc.toLocaleString('en-US')}</td></tr>`).join('');
 }
-function selectCategory(event){
- const button=event.target.closest('[data-category]');if(!button)return;
- const wasSegment=button.classList.contains('donut-segment');
- const category=button.dataset.category;
- // Recreated SVG paths need focus restored for keyboard activation only.
- const keyboardActivation=event.type==='keydown'||event.detail===0;
- selectedCategory=category===selectedCategory?'':category;
- renderCategories();renderRepositories();
- if(keyboardActivation){
-  const candidates=[...document.querySelectorAll('[data-category]')].filter(b=>b.dataset.category===category);
-  candidates.find(b=>b.classList.contains('donut-segment')===wasSegment)?.focus();
- }
+let categoryCountFrame=0;
+function updateCategoryCount(value){
+ const element=document.querySelector('.donut-total');cancelAnimationFrame(categoryCountFrame);
+ const start=Number(element.textContent);if(reducedMotion()){element.textContent=String(value);return;}
+ const time=performance.now();function tick(now){const progress=Math.min((now-time)/260,1);element.textContent=String(Math.round(start+(value-start)*(1-(1-progress)**3)));if(progress<1)categoryCountFrame=requestAnimationFrame(tick);}
+ categoryCountFrame=requestAnimationFrame(tick);
 }
-document.getElementById('category-chart').addEventListener('click',selectCategory);
-document.getElementById('category-chart').addEventListener('keydown',event=>{if(event.target.classList.contains('donut-segment')&&['Enter',' '].includes(event.key)){event.preventDefault();selectCategory(event);}});
-document.getElementById('reset-category').addEventListener('click',()=>{selectedCategory='';renderCategories();renderRepositories();});
+function setCategory(category){
+ if(category===selectedCategory)return;selectedCategory=category;
+ document.querySelectorAll('#category-chart [data-category]').forEach(element=>{
+  const selected=element.dataset.category===category;
+  element.setAttribute('aria-pressed',String(selected));element.classList.toggle('is-active',selected);element.classList.toggle('selected',selected);element.classList.toggle('muted',Boolean(category)&&!selected&&element.classList.contains('donut-segment'));
+ });
+ const data=categoryTotals.find(c=>c.name===category);updateCategoryCount(data?data.count:100);
+ document.getElementById('reset-category').classList.toggle('active',!category);renderRepositories();
+}
+const categoryChart=document.getElementById('category-chart');
+categoryChart.addEventListener('pointerover',event=>{if(event.pointerType==='touch')return;const target=event.target.closest('[data-category]');if(target)setCategory(target.dataset.category);});
+categoryChart.addEventListener('focusin',event=>{const target=event.target.closest('[data-category]');if(target)setCategory(target.dataset.category);});
+categoryChart.addEventListener('click',event=>{const target=event.target.closest('[data-category]');if(target)setCategory(target.dataset.category);});
+categoryChart.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();setCategory('');}else if(event.target.classList.contains('donut-segment')&&['Enter',' '].includes(event.key)){event.preventDefault();setCategory(event.target.dataset.category);}});
+document.getElementById('reset-category').addEventListener('click',()=>setCategory(''));
+document.getElementById('reset-category').addEventListener('pointerenter',()=>setCategory(''));
+document.getElementById('statistics').addEventListener('pointerleave',()=>{if(!document.activeElement?.matches('#category-chart :focus-visible'))setCategory('');});
+document.getElementById('statistics').addEventListener('focusout',event=>{if(!event.currentTarget.contains(event.relatedTarget))setCategory('');});
 document.getElementById('repository-sort').addEventListener('change',renderRepositories);
 function renderHistogram(){
  const data=PAPER.histogram.map((n,i)=>[String(i+4),n]);
@@ -93,15 +127,50 @@ function showBin(event){const bin=event.target.closest('[data-count]');if(bin)do
 document.getElementById('histogram').addEventListener('pointerover',showBin);
 document.getElementById('histogram').addEventListener('focusin',showBin);
 
-// All finding paragraphs below are manuscript excerpts, with only TeX markup converted.
-const findingMetrics=[['91.47%','Head Pass Rate','26.36%','Fail-to-Pass Rate'],['33.14–49.04%','Reference bugs localized','2.00–7.84%','Multi-file bugs localized'],['50.23%','Incomplete data processing · Hunk LR','40.56%','Incomplete output · Hunk LR'],['36.0%','Premature search termination','30.9%','Evidence underuse'],['+4.99 pp','File recall','+2.77 pp','Function recall']];
+// Concise takeaways and chart values come from the manuscript tables and RQ analysis.
+function findingViews(index){
+ const row=(label,values,color)=>({label,values,colors:color?[color]:undefined});
+ const blue='#1D73FF',indigo='#475CFF',violet='#8054FF',burgundy='#710120',baseline='#9BA8BB';
+ if(index===0)return [
+  {label:'Test quality',unit:'Seven-agent mean (%)',source:'Table 3 · Seven coding agents',rows:[row('Head Pass Rate',[91.47],blue),row('Entry Coverage',[75.29],'#124A09'),row('Change-focused Coverage',[80.48],indigo),row('Fail-to-Pass Rate',[26.36],violet)]},
+  {label:'Localization',unit:'Mean localization recall (%)',source:'Table 3 · Seven coding agents',rows:[row('File',[78.11],blue),row('Function',[51.29],indigo),row('Hunk',[51.88],violet)]}
+ ];
+ if(index===1){
+  const range=(label,column,color)=>({label,min:Math.min(...models.map(m=>m.bugs[column])),max:Math.max(...models.map(m=>m.bugs[column])),color});
+  return [
+   {label:'Across models',unit:'Reference bugs localized (%)',source:'Table 5 · Range across seven models',type:'range',rows:[range('All reference bugs',0,indigo),range('Single-file bugs',1,blue),range('Multi-file bugs',2,burgundy)]},
+   {label:'By model',unit:'Reference bugs localized (%)',source:'Table 5 · Bug-level localization criterion',series:[{name:'Single-file',color:blue},{name:'Multi-file',color:burgundy}],rows:models.map(m=>row(m.name,[m.bugs[1],m.bugs[2]]))}
+  ];
+ }
+ if(index===2){
+  const selected=['Incomplete output','Incomplete data processing','Missing input validation','Incorrect regular expression','Generic data-operation error','Typo / symbol error'];
+  return [{label:'Hunk recall',column:4,color:violet},{label:'Function recall',column:2,color:indigo}].map(v=>({label:v.label,unit:'Mean localization recall (%)',source:'Table 6 · Selected cohorts · Five systems · 86 annotated instances; cohorts overlap',rows:selected.map(name=>row(name,[PAPER.cohorts.find(c=>c.name===name).values[v.column]],v.color))}));
+ }
+ if(index===3)return [
+  {label:'Test construction',unit:'Share of reviewed failure mechanisms (%)',source:'RQ4 · Reviewed Task 1 failure mechanisms',max:40,precision:1,rows:PAPER.failureMechanisms.tests.map(([name,value])=>row(name,[value],violet))},
+  {label:'Localization',unit:'Share of reviewed failure mechanisms (%)',source:'RQ4 · Reviewed localization failure mechanisms',max:40,precision:1,rows:PAPER.failureMechanisms.localization.map(([name,value])=>row(name,[value],blue))}
+ ];
+ return ['recall','precision'].map(metric=>({label:metric==='recall'?'Recall':'Precision',unit:`Localization ${metric} (%)`,source:'Table 7 · GPT-5.6-Sol / Codex · 100 paired instances',series:[{name:'Repository-provided tests',color:baseline},{name:'Agent-authored tests',color:blue}],rows:PAPER.pairedTesting[metric].map((values,i)=>row(['File','Function','Hunk'][i],values))}));
+}
 let activeFinding=0;
-document.getElementById('finding-tabs').innerHTML=PAPER.findings.map((f,i)=>`<button id="finding-${i}" data-finding="${i}" role="tab" aria-selected="${i===0}" aria-controls="finding-panel" tabindex="${i===0?0:-1}"><span>RQ${f.rq}</span>${f.title}</button>`).join('');
+document.getElementById('finding-tabs').innerHTML=PAPER.findings.map((f,i)=>`<button id="finding-${i}" data-finding="${i}" role="tab" aria-selected="${i===0}" aria-controls="finding-panel" tabindex="${i===0?0:-1}"><span>RQ${f.rq}</span>${PAPER.highlights[i].label}</button>`).join('');
+function renderFindingChart(viewIndex){
+ const view=findingViews(activeFinding)[viewIndex],max=view.max||100,series=view.series||[],precision=view.precision??2;
+ const ticks=Array.from({length:5},(_,i)=>max*i/4);
+ const rows=view.rows.map(r=>{
+  const values=view.type==='range'?`<div class="plot-lane"><span class="plot-range" style="left:${r.min/max*100}%;width:${(r.max-r.min)/max*100}%;background:${r.color}"></span><span class="range-value">${r.min.toFixed(2)}–${r.max.toFixed(2)}%</span></div>`:r.values.map((value,i)=>`<div class="plot-lane" aria-label="${escapeHTML(r.label)}${series[i]?', '+series[i].name:''}: ${value.toFixed(precision)}%"><span class="plot-bar" style="width:${value/max*100}%;background:${r.colors?.[i]||series[i]?.color||'#1D73FF'}"></span><span class="plot-value">${value.toFixed(precision)}%</span></div>`).join('');
+  return `<div class="plot-row"><span class="plot-row-label">${escapeHTML(r.label)}</span><div class="plot-lanes">${values}</div></div>`;
+ }).join('');
+ document.getElementById('finding-chart').innerHTML=`<p class="plot-unit">${view.unit}</p>${series.length?`<div class="plot-legend">${series.map(s=>`<span><i style="background:${s.color}"></i>${s.name}</span>`).join('')}</div>`:''}<div class="evidence-plot ${view.type==='range'?'range-plot':''}"><div class="plot-axis" aria-hidden="true">${ticks.map(n=>`<span>${n}</span>`).join('')}</div><div class="plot-rows">${rows}</div></div><p class="plot-source">${view.source}</p>`;
+ animateBars(document.getElementById('finding-chart'));
+}
 function renderFinding(index){
- activeFinding=index;const f=PAPER.findings[index],metrics=findingMetrics[index];
+ activeFinding=index;const finding=PAPER.findings[index],highlight=PAPER.highlights[index],views=findingViews(index);
  document.getElementById('finding-count').textContent=`${index+1} / ${PAPER.findings.length}`;
- document.getElementById('finding-panel').setAttribute('aria-labelledby',`finding-${index}`);
- document.getElementById('finding-panel').innerHTML=`<p class="eyebrow">RQ${f.rq}</p><h3>${f.title}</h3><div class="finding-metrics"><div><strong>${metrics[0]}</strong><span>${metrics[1]}</span></div><div><strong>${metrics[2]}</strong><span>${metrics[3]}</span></div></div><div class="original-prose">${f.html}</div><a class="text-link paper-source" href="assets/paper.pdf" target="_blank">Paper · Experiments ↗</a>`;
+ const panel=document.getElementById('finding-panel');panel.setAttribute('aria-labelledby',`finding-${index}`);
+ panel.innerHTML=`<p class="eyebrow">RQ${finding.rq}</p><h3>${finding.title}</h3><ul class="finding-points">${highlight.points.map(([label,value])=>`<li><strong>${label}.</strong> ${value}</li>`).join('')}</ul><div class="finding-evidence"><div class="finding-view-tabs" role="tablist" aria-label="RQ${finding.rq} chart view">${views.map((view,i)=>`<button id="finding-view-${i}" data-finding-view="${i}" role="tab" aria-controls="finding-chart" aria-selected="${i===0}" tabindex="${i===0?0:-1}">${view.label}</button>`).join('')}</div><div id="finding-chart" role="tabpanel" aria-labelledby="finding-view-0"></div></div><a class="text-link paper-source" href="assets/paper.pdf" target="_blank" rel="noopener">Paper · RQ${finding.rq} ↗</a>`;
+ renderFindingChart(0);
+ wireTabs('[data-finding-view]',button=>{document.getElementById('finding-chart').setAttribute('aria-labelledby',button.id);renderFindingChart(Number(button.dataset.findingView));});
 }
 wireTabs('[data-finding]',button=>renderFinding(Number(button.dataset.finding)));
 ['prev','next'].forEach(direction=>document.getElementById(`finding-${direction}`).addEventListener('click',()=>{document.querySelector(`[data-finding="${(activeFinding+(direction==='next'?1:-1)+PAPER.findings.length)%PAPER.findings.length}"]`).click();}));
@@ -120,6 +189,8 @@ const caseLabels=['Passing tests, unchecked contract','New assertions, shared de
 document.getElementById('mechanism-tabs').innerHTML=PAPER.cases.map((c,i)=>`<button id="mechanism-${i}" data-mechanism="${i}" role="tab" aria-selected="${i===0}" aria-controls="mechanism-panel" tabindex="${i===0?0:-1}"><span>CASE 0${i+1} · ${i===1||i===4?'SUCCESS':'LIMITATION'}</span>${caseLabels[i]}</button>`).join('');
 function renderMechanism(index){const c=PAPER.cases[index];document.getElementById('mechanism-panel').setAttribute('aria-labelledby',`mechanism-${index}`);document.getElementById('mechanism-panel').innerHTML=`<p class="eyebrow">TRAJECTORY CASE 0${index+1}</p><h3>${c.title}</h3><div class="mechanism-meta">${c.meta}</div><div class="paper-evidence">${c.html}</div><a class="paper-source text-link" href="assets/paper.pdf#page=25" target="_blank">Paper · Appendix D ↗</a>`;}
 wireTabs('[data-mechanism]',button=>renderMechanism(Number(button.dataset.mechanism)));
-// Vertical tablists support their expected keyboard directions as well.
-document.querySelectorAll('[aria-orientation="vertical"]').forEach(list=>list.addEventListener('keydown',event=>{if(!['ArrowUp','ArrowDown'].includes(event.key))return;const tabs=[...list.querySelectorAll('[role="tab"]')];const i=tabs.indexOf(event.target);if(i<0)return;event.preventDefault();const next=tabs[(i+(event.key==='ArrowDown'?1:-1)+tabs.length)%tabs.length];next.click();next.focus();}));
 renderResults();renderCategories();renderRepositories();renderHistogram();renderFinding(0);renderTask('prd');renderMechanism(0);
+
+window.addEventListener('resize',()=>requestAnimationFrame(refreshTabIndicators));
+document.fonts.ready.then(refreshTabIndicators);
+requestAnimationFrame(refreshTabIndicators);

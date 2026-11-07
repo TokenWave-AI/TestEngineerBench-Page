@@ -29,6 +29,8 @@ jobs:
           mkdir _site
           cp index.html style.css script.js .nojekyll _site/
           cp -R assets _site/assets
+          mkdir _site/video
+          cp video/TestEngineerBench-promo.mp4 video/promo-poster.png _site/video/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
