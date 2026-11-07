@@ -98,3 +98,4 @@ footer{font-size:12px;line-height:18px;padding:32px 0;gap:24px;color:var(--muted
 
 /* Research summary uses prose instead of promotional feature labels. */
 .hero-question{font-size:16px;line-height:26px;color:var(--ink)}.premises p{display:block;font-size:14px;line-height:22px;color:var(--muted)}.benchmark-description{max-width:880px;margin-bottom:32px}.finding-intro{max-width:880px}.art-note{text-transform:none;letter-spacing:0}
+@media(max-width:640px){.topbar nav a:nth-child(1){display:block}.topbar nav a:nth-child(2){display:none}}
