@@ -66,7 +66,19 @@ function renderRepositories(){
  document.getElementById('repository-scale').innerHTML=top.map(r=>`<a href="${r.url}" target="_blank" rel="noopener" class="repo-bar" aria-label="${escapeHTML(r.repo)}, ${r[metric]} ${units[metric]}"><span>${escapeHTML(r.repo)}</span><span class="repo-track"><i style="width:${r[metric]/max*100}%;background:${categoryColor(r.category)}"></i></span><b>${r[metric].toLocaleString('en-US',{maximumFractionDigits:1})}</b></a>`).join('')+`<p class="chart-source">${rows.length>8?'Top 8 repositories · ':''}${units[metric]} · Linear scale from 0</p>`;
  document.getElementById('repository-body').innerHTML=rows.map(r=>`<tr><td><a href="${r.url}" target="_blank" rel="noopener">${escapeHTML(r.repo)}</a></td><td>${escapeHTML(r.category)}</td><td>${r.instances}</td><td>${r.defects}</td><td>${r.kloc.toLocaleString('en-US')}</td></tr>`).join('');
 }
-function selectCategory(event){const button=event.target.closest('[data-category]');if(!button)return;const wasSegment=button.classList.contains('donut-segment');const category=button.dataset.category;selectedCategory=category===selectedCategory?'':category;renderCategories();renderRepositories();const candidates=[...document.querySelectorAll('[data-category]')].filter(b=>b.dataset.category===category);candidates.find(b=>b.classList.contains('donut-segment')===wasSegment)?.focus();}
+function selectCategory(event){
+ const button=event.target.closest('[data-category]');if(!button)return;
+ const wasSegment=button.classList.contains('donut-segment');
+ const category=button.dataset.category;
+ // Recreated SVG paths need focus restored for keyboard activation only.
+ const keyboardActivation=event.type==='keydown'||event.detail===0;
+ selectedCategory=category===selectedCategory?'':category;
+ renderCategories();renderRepositories();
+ if(keyboardActivation){
+  const candidates=[...document.querySelectorAll('[data-category]')].filter(b=>b.dataset.category===category);
+  candidates.find(b=>b.classList.contains('donut-segment')===wasSegment)?.focus();
+ }
+}
 document.getElementById('category-chart').addEventListener('click',selectCategory);
 document.getElementById('category-chart').addEventListener('keydown',event=>{if(event.target.classList.contains('donut-segment')&&['Enter',' '].includes(event.key)){event.preventDefault();selectCategory(event);}});
 document.getElementById('reset-category').addEventListener('click',()=>{selectedCategory='';renderCategories();renderRepositories();});
