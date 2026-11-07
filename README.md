@@ -33,7 +33,8 @@ The site follows the supplied TokenWave research guidelines: white/black/gray su
 - `assets/paper.pdf`: user-supplied paper dated October 25, 2026.
 - `assets/logo.svg` / `assets/logo.png`: transparent horizontal logo for a README or website.
 - `assets/logo-display.png`: the full logo with transparent outer margins removed.
-- `assets/wordmark.png`: lettering extracted from the approved logo, used in the homepage title without the bear.
+- `assets/wordmark.png`: original lettering extracted from the approved logo.
+- `assets/wordmark-brand.svg`: self-contained black/brand-blue title variant, preserving the original lettering silhouette.
 - `assets/mascot.svg` / `assets/mascot.png`: standalone bear extracted from the approved logo.
 - `assets/favicon.png`: small bear portrait for browser tabs.
 - `assets/hero.svg`: original workbench illustration.
