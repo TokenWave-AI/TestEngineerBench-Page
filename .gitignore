@@ -1,2 +1,5 @@
 .DS_Store
 node_modules/
+
+# Local-only trial fonts and unpublished preview assets
+.local-assets/

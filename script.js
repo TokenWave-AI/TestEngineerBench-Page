@@ -41,8 +41,19 @@ let selectedCategory = '';
 const categoryTotals = [...new Set(PAPER.repositories.map(r => r.category))].map(name => ({
  name, count: PAPER.repositories.filter(r => r.category === name).reduce((sum, r) => sum + r.instances, 0)
 })).sort((a,b) => b.count-a.count || a.name.localeCompare(b.name));
+const categoryPalette=['#1D73FF','#475CFF','#8054FF','#124A09','#839800','#85EA00','#710120','#C51354','#DF3FD3','#F5580B','#FFA222','#FDDC24','#D9DDFF','#EEE8FF','#FFE4EE','#FFDECE'];
+const categoryColor=name=>categoryPalette[categoryTotals.findIndex(c=>c.name===name)];
 function renderCategories(){
- document.getElementById('category-chart').innerHTML=categoryTotals.map(c=>`<button class="category-row ${selectedCategory===c.name?'selected':''}" data-category="${escapeHTML(c.name)}" aria-pressed="${selectedCategory===c.name}" aria-label="${escapeHTML(c.name)}, ${c.count} instances"><span>${escapeHTML(c.name)}</span><span class="category-track"><i style="width:${c.count/17*100}%"></i></span><b>${c.count}</b></button>`).join('');
+ let angle=-Math.PI/2;
+ const segments=categoryTotals.map(c=>{
+  const start=angle+.006,end=angle+c.count/100*Math.PI*2-.006;angle+=c.count/100*Math.PI*2;
+  const point=(r,a)=>[140+r*Math.cos(a),140+r*Math.sin(a)].map(n=>n.toFixed(3)).join(' ');
+  const large=end-start>Math.PI?1:0;
+  const d=`M ${point(114,start)} A 114 114 0 ${large} 1 ${point(114,end)} L ${point(78,end)} A 78 78 0 ${large} 0 ${point(78,start)} Z`;
+  return `<path d="${d}" fill="${categoryColor(c.name)}" class="donut-segment ${selectedCategory&&selectedCategory!==c.name?'muted':''}" data-category="${escapeHTML(c.name)}" tabindex="0" role="button" aria-label="${escapeHTML(c.name)}, ${c.count} instances" aria-pressed="${selectedCategory===c.name}"><title>${escapeHTML(c.name)}: ${c.count} instances</title></path>`;
+ }).join('');
+ const selected=categoryTotals.find(c=>c.name===selectedCategory);
+ document.getElementById('category-chart').innerHTML=`<svg viewBox="0 0 280 280" class="category-donut" role="group" aria-label="Instances across 16 application categories">${segments}<text x="140" y="139" text-anchor="middle" class="donut-total">${selected?selected.count:100}</text><text x="140" y="164" text-anchor="middle" class="donut-caption">instances</text></svg><div class="category-legend">${categoryTotals.map(c=>`<button class="category-row ${selectedCategory===c.name?'selected':''}" data-category="${escapeHTML(c.name)}" aria-pressed="${selectedCategory===c.name}" aria-label="Filter ${escapeHTML(c.name)}, ${c.count} instances"><i class="category-swatch" style="background:${categoryColor(c.name)}"></i><span>${escapeHTML(c.name).replaceAll('/',' / ')}</span><b>${c.count}</b></button>`).join('')}</div>`;
  document.getElementById('reset-category').classList.toggle('active',!selectedCategory);
 }
 function renderRepositories(){
@@ -52,33 +63,33 @@ function renderRepositories(){
  document.getElementById('repository-title').textContent=selectedCategory||'All repositories';
  document.getElementById('repository-count').textContent=`${rows.length} repositories · ${rows.reduce((s,r)=>s+r.instances,0)} instances · ${rows.reduce((s,r)=>s+r.defects,0)} recorded defect occurrences`;
  const top=rows.slice(0,8);const max=Math.max(...rows.map(r=>r[metric]));
- document.getElementById('repository-scale').innerHTML=top.map(r=>`<a href="${r.url}" target="_blank" rel="noopener" class="repo-bar" aria-label="${escapeHTML(r.repo)}, ${r[metric]} ${units[metric]}"><span>${escapeHTML(r.repo)}</span><span class="repo-track"><i style="width:${r[metric]/max*100}%"></i></span><b>${r[metric].toLocaleString('en-US',{maximumFractionDigits:1})}</b></a>`).join('')+`<p class="chart-source">${rows.length>8?'Top 8 repositories · ':''}${units[metric]} · Linear scale from 0</p>`;
+ document.getElementById('repository-scale').innerHTML=top.map(r=>`<a href="${r.url}" target="_blank" rel="noopener" class="repo-bar" aria-label="${escapeHTML(r.repo)}, ${r[metric]} ${units[metric]}"><span>${escapeHTML(r.repo)}</span><span class="repo-track"><i style="width:${r[metric]/max*100}%;background:${categoryColor(r.category)}"></i></span><b>${r[metric].toLocaleString('en-US',{maximumFractionDigits:1})}</b></a>`).join('')+`<p class="chart-source">${rows.length>8?'Top 8 repositories · ':''}${units[metric]} · Linear scale from 0</p>`;
  document.getElementById('repository-body').innerHTML=rows.map(r=>`<tr><td><a href="${r.url}" target="_blank" rel="noopener">${escapeHTML(r.repo)}</a></td><td>${escapeHTML(r.category)}</td><td>${r.instances}</td><td>${r.defects}</td><td>${r.kloc.toLocaleString('en-US')}</td></tr>`).join('');
 }
-document.getElementById('category-chart').addEventListener('click',event=>{const button=event.target.closest('[data-category]');if(!button)return;selectedCategory=button.dataset.category===selectedCategory?'':button.dataset.category;renderCategories();renderRepositories();const active=[...document.querySelectorAll('[data-category]')].find(b=>b.dataset.category===button.dataset.category);active.focus();});
+function selectCategory(event){const button=event.target.closest('[data-category]');if(!button)return;const wasSegment=button.classList.contains('donut-segment');const category=button.dataset.category;selectedCategory=category===selectedCategory?'':category;renderCategories();renderRepositories();const candidates=[...document.querySelectorAll('[data-category]')].filter(b=>b.dataset.category===category);candidates.find(b=>b.classList.contains('donut-segment')===wasSegment)?.focus();}
+document.getElementById('category-chart').addEventListener('click',selectCategory);
+document.getElementById('category-chart').addEventListener('keydown',event=>{if(event.target.classList.contains('donut-segment')&&['Enter',' '].includes(event.key)){event.preventDefault();selectCategory(event);}});
 document.getElementById('reset-category').addEventListener('click',()=>{selectedCategory='';renderCategories();renderRepositories();});
 document.getElementById('repository-sort').addEventListener('change',renderRepositories);
 function renderHistogram(){
- const grouped=document.getElementById('histogram-mode').value==='grouped';
- const data=grouped?[['4–5',74],['6–9',24],['10–15',2]]:PAPER.histogram.map((n,i)=>[String(i+4),n]);
- const max=grouped?80:50;const width=480,height=280,left=34,top=24,bottom=38,plot=height-top-bottom,step=(width-left-12)/data.length;
- const ticks=Array.from({length:grouped?5:6},(_,i)=>i*(grouped?20:10));
+ const data=PAPER.histogram.map((n,i)=>[String(i+4),n]);
+ const max=50;const width=480,height=280,left=34,top=24,bottom=38,plot=height-top-bottom,step=(width-left-12)/data.length;
+ const ticks=Array.from({length:6},(_,i)=>i*10);
  document.getElementById('histogram').innerHTML=`<svg viewBox="0 0 ${width} ${height}" role="group" aria-label="Distribution of recorded defects per instance">${ticks.map(n=>`<line x1="${left}" y1="${height-bottom-n/max*plot}" x2="${width-8}" y2="${height-bottom-n/max*plot}" stroke="#e5e8ed"/><text x="${left-9}" y="${height-bottom-n/max*plot+4}" text-anchor="end" class="chart-tick">${n}</text>`).join('')}${data.map(([label,n],i)=>{const x=left+i*step+step*.14,y=height-bottom-n/max*plot;return `<g class="histogram-bin" tabindex="0" data-label="${label}" data-count="${n}" aria-label="${label} recorded defects: ${n} instances"><title>${label} defects: ${n} instances</title><rect x="${left+i*step}" y="${top-20}" width="${step}" height="${plot+42}" fill="transparent"/><rect class="histogram-bar" x="${x}" y="${y}" width="${step*.72}" height="${n/max*plot}" rx="4"/><text class="bar-value" x="${x+step*.36}" y="${y-8}" text-anchor="middle">${n}</text><text class="chart-tick" x="${x+step*.36}" y="${height-15}" text-anchor="middle">${label}</text></g>`;}).join('')}</svg><p class="axis-label">Recorded defects per instance</p>`;
 }
 function showBin(event){const bin=event.target.closest('[data-count]');if(bin)document.getElementById('histogram-detail').textContent=`${bin.dataset.label} recorded defects · ${bin.dataset.count} instances (${bin.dataset.count}% of the benchmark)`;}
 document.getElementById('histogram').addEventListener('pointerover',showBin);
 document.getElementById('histogram').addEventListener('focusin',showBin);
-document.getElementById('histogram-mode').addEventListener('change',()=>{renderHistogram();document.getElementById('histogram-detail').textContent='100 instances · Median 5 · Mean 5.31';});
 
 // All finding paragraphs below are manuscript excerpts, with only TeX markup converted.
-const findingMetrics=[['91.47%','Head Pass Rate','26.36%','Fail-to-Pass Rate'],['80.48%','Mean change-focused coverage','24.24–37.82%','F2P in the 80–100% CFG interval'],['78.11%','File recall','51.29%','Function recall'],['40.63–59.05%','Single-file bugs localized','2.00–7.84%','Multi-file bugs localized'],['31.6%','Assertion mismatches','37.5%','Misconfigured mocks'],['36.0%','Premature search termination','30.9%','Evidence underuse'],['+4.99 pp','File recall','+2.77 pp','Function recall']];
+const findingMetrics=[['91.47%','Head Pass Rate','26.36%','Fail-to-Pass Rate'],['33.14–49.04%','Reference bugs localized','2.00–7.84%','Multi-file bugs localized'],['50.23%','Incomplete data processing · Hunk LR','40.56%','Incomplete output · Hunk LR'],['36.0%','Premature search termination','30.9%','Evidence underuse'],['+4.99 pp','File recall','+2.77 pp','Function recall']];
 let activeFinding=0;
-document.getElementById('finding-tabs').innerHTML=PAPER.findings.map((f,i)=>`<button id="finding-${i}" data-finding="${i}" role="tab" aria-selected="${i===0}" aria-controls="finding-panel" tabindex="${i===0?0:-1}"><span>0${i+1}</span>${f.title}</button>`).join('');
+document.getElementById('finding-tabs').innerHTML=PAPER.findings.map((f,i)=>`<button id="finding-${i}" data-finding="${i}" role="tab" aria-selected="${i===0}" aria-controls="finding-panel" tabindex="${i===0?0:-1}"><span>RQ${f.rq}</span>${f.title}</button>`).join('');
 function renderFinding(index){
  activeFinding=index;const f=PAPER.findings[index],metrics=findingMetrics[index];
  document.getElementById('finding-count').textContent=`${index+1} / ${PAPER.findings.length}`;
  document.getElementById('finding-panel').setAttribute('aria-labelledby',`finding-${index}`);
- document.getElementById('finding-panel').innerHTML=`<p class="eyebrow">FINDING 0${index+1}</p><h3>${f.title}</h3><div class="finding-metrics"><div><strong>${metrics[0]}</strong><span>${metrics[1]}</span></div><div><strong>${metrics[2]}</strong><span>${metrics[3]}</span></div></div><p class="original-prose">${f.html}</p><a class="text-link paper-source" href="assets/paper.pdf" target="_blank">Paper · Experiments ↗</a>`;
+ document.getElementById('finding-panel').innerHTML=`<p class="eyebrow">RQ${f.rq}</p><h3>${f.title}</h3><div class="finding-metrics"><div><strong>${metrics[0]}</strong><span>${metrics[1]}</span></div><div><strong>${metrics[2]}</strong><span>${metrics[3]}</span></div></div><div class="original-prose">${f.html}</div><a class="text-link paper-source" href="assets/paper.pdf" target="_blank">Paper · Experiments ↗</a>`;
 }
 wireTabs('[data-finding]',button=>renderFinding(Number(button.dataset.finding)));
 ['prev','next'].forEach(direction=>document.getElementById(`finding-${direction}`).addEventListener('click',()=>{document.querySelector(`[data-finding="${(activeFinding+(direction==='next'?1:-1)+PAPER.findings.length)%PAPER.findings.length}"]`).click();}));

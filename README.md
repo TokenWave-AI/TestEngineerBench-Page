@@ -5,7 +5,7 @@
 
 TestEngineerBench evaluates requirements-driven testing and defect discovery across **100 instances**, **78 Python repositories**, **16 application categories**, and **531 recorded defect occurrences**. Agents receive a product requirements document, a prerelease repository, and a configured execution environment, without issue descriptions or investigation targets.
 
-This repository contains the project website, not the benchmark implementation. It presents the original abstract and Figure 1, sortable model results, interactive dataset statistics, seven verbatim findings, a complete Folium task input with output excerpts, and six trajectory case studies.
+This repository contains the project website, not the benchmark implementation. It presents the original abstract and Figure 1, sortable model results, interactive dataset statistics, five RQ groups of verbatim findings, a complete Folium task input with output excerpts, and six trajectory case studies.
 
 ### Local preview
 
@@ -25,7 +25,7 @@ Published project URL: `https://tokenwave-ai.github.io/TestEngineerBench-Page/`.
 
 ### Visual system
 
-The site follows the supplied TokenWave research guidelines: white/black/gray surfaces, blue links, limited lime emphasis, 1120px content width, 32/24/18px headings and 14px body text. Franie Test/Franie and Source Han Sans SC/Noto Sans SC are preferred font families, with a system sans-serif fallback; font binaries were not supplied. The approved bear artwork is preserved. `assets/tokenwave.svg` is the unmodified horizontal black-wordmark brand asset, used in affiliations and the footer.
+The site follows the supplied TokenWave research guidelines: white/black/gray surfaces, blue links, limited lime emphasis, 1120px content width, 32/24/18px headings and 14px body text. The public site self-hosts the OFL-licensed Noto Sans SC Latin webfont as the guideline’s compatibility font. Actual Franie Test Regular/SemiBold files are available only for local unpublished previews under ignored `.local-assets/franie/`; the development server injects them locally. The foundry limits Test fonts to unpublished work, so they are not committed or included in Pages. Use `?font=compatible` locally to check the public typography. Franie remains first in the font stack for viewers who have it installed. Body text is 14/22px and captions 12/18px; section/card headings follow 32/24/18px levels. The approved bear artwork is preserved. `assets/tokenwave.svg` is the unmodified horizontal black-wordmark brand asset, used in affiliations and the footer.
 
 ### Content and assets
 
@@ -33,7 +33,7 @@ The site follows the supplied TokenWave research guidelines: white/black/gray su
 - `assets/paper-content.js`: manuscript excerpts, complete PRD, instruction templates, six trajectory cases, and the 78-repository inventory.
 - `assets/figure1.svg`: the paper’s original Figure 1, copied from its self-contained source SVG.
 - `assets/folium-prd.md`: the complete Folium episode-0001 PRD, as reproduced in Appendix C.
-- `assets/wordmark-option-a.svg`: selected blue/black lettering with a lime underline.
+- `assets/wordmark-option-a.svg`: selected blue/black lettering with a blue underline.
 - `assets/paper.pdf`: user-supplied paper dated October 25, 2026.
 - `assets/logo.svg` / `assets/logo.png`: transparent horizontal logo for a README or website.
 - `assets/logo-display.png`: the full logo with transparent outer margins removed.
@@ -54,11 +54,11 @@ Copy `assets/logo.png` to the destination repository first.
 
 ### Results and provenance
 
-All model numbers are transcribed from Tables 3 and 5 of the supplied PDF, not live leaderboard measurements. The abstract, seven finding paragraphs, full PRD, code, narration and analysis come from the matching manuscript (`TestEngineerBench-Paper/main.tex`). Only TeX/Markdown markup and spacing are converted for the web. Findings retain their original sentences; display metrics repeat their reported values. The six focused cases preserve the paper’s archived-evaluation labels where applicable.
+All model numbers are transcribed from Tables 3 and 5 of the supplied PDF, not live leaderboard measurements. The abstract, 15 finding paragraphs across the five RQ sections, full PRD, code, narration and analysis come from the matching manuscript (`TestEngineerBench-Paper/main.tex`). Only TeX/Markdown markup and spacing are converted for the web. Findings retain their original sentences; display metrics repeat their reported values. The six focused cases preserve the paper’s archived-evaluation labels where applicable.
 
 Appendix C supplies the complete Folium episode-0001 PRD, both task instruction templates, six Task 1 test excerpts and the Task 2 report excerpt. Outputs are excerpts exactly as qualified in the paper; the PRD is complete. Task 1 and Task 2 are independent runs. The Task 2 panel distinguishes 15 agent-reported findings from the five reference bugs credited by the evaluator. Appendix D supplies all six focused trajectory cases, including the original analysis.
 
-Dataset charts use Figure 2, Table 2 and the current repository inventory: 78 repositories, 100 instances, 531 recorded defect occurrences and 16 application categories. Category buttons filter the repository chart and inventory. Repository bars can switch between recorded defects, source kLOC and instances. The defects-per-instance histogram switches between exact bins and the paper’s grouped bins; it remains benchmark-wide because the paper does not publish category-by-defect joint counts. Source kLOC is a per-repository median for repository bars, while the 80.4k headline is the per-instance median from Table 2. Older release-audit files are not used.
+Dataset charts use Figure 2, Table 2 and the current repository inventory: 78 repositories, 100 instances, 531 recorded defect occurrences and 16 application categories. The multicolor category donut and its legend filter the repository chart and inventory. Colors come from the supplied chart palette and stay consistent in repository bars. Repository bars can switch between recorded defects, source kLOC and instances. The defects-per-instance histogram shows the paper’s exact counts without a grouping selector; it remains benchmark-wide because the paper does not publish category-by-defect joint counts. Source kLOC is a per-repository median for repository bars, while the 80.4k headline is the per-instance median from Table 2. Older release-audit files are not used.
 
 Update `models` and `tracks` in `script.js` for leaderboard revisions and `assets/paper-content.js` for manuscript revisions, keeping the static abstract and caption in `index.html` synchronized. Code/data resources remain coming soon until official destinations exist.
 
@@ -67,3 +67,5 @@ The initial editorial layout drew on [Cambrian-S](https://cambrian-mllm.github.i
 The Hugging Face button icon is sourced from [Simple Icons](https://github.com/simple-icons/simple-icons/blob/develop/icons/huggingface.svg) (CC0); GitHub and Hugging Face names and marks belong to their respective owners.
 
 Content organization draws on [OSWorld-Science](https://discoailab.github.io/osworld-science-page/). The page follows statistics → Abstract → Figure 1 → Leaderboard → dataset charts → Key findings → Case studies; research prose and case evidence come from the paper.
+
+Font sources: [Noto Sans SC / Google Fonts](https://fonts.google.com/noto/specimen/Noto+Sans+SC), with its OFL in `assets/fonts/OFL-NotoSansSC.txt`; [Franie Test terms](https://www.thatthattype.com/test-fonts). Local trial fonts were downloaded from the Franie package on Befonts and remain excluded from publication.
