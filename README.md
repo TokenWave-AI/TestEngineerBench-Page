@@ -5,7 +5,7 @@
 
 TestEngineerBench evaluates requirements-driven testing and defect discovery across **100 instances**, **78 Python repositories**, **16 application categories**, and **531 recorded defect occurrences**. Agents receive a product requirements document, a prerelease repository, and a configured execution environment, without issue descriptions or investigation targets.
 
-This repository contains the project website, not the benchmark implementation. It presents the original abstract and Figure 1, sortable model results, interactive dataset statistics, five RQ groups with concise takeaways and evidence charts, a complete Folium task input with output excerpts, and six trajectory case studies.
+This repository contains the project website, not the benchmark implementation. It introduces the benchmark goal, requirements-driven investigation, two independent tasks and the original Figure 1, followed by sortable model results, interactive dataset statistics, five RQ groups with concise takeaways and evidence charts, a complete Folium task input with output excerpts, and six trajectory case studies.
 
 ### Local preview
 
@@ -66,7 +66,7 @@ The initial editorial layout drew on [Cambrian-S](https://cambrian-mllm.github.i
 
 The Hugging Face button icon is sourced from [Simple Icons](https://github.com/simple-icons/simple-icons/blob/develop/icons/huggingface.svg) (CC0); GitHub and Hugging Face names and marks belong to their respective owners.
 
-Content organization draws on [OSWorld-Science](https://discoailab.github.io/osworld-science-page/). The page follows statistics → Abstract → Figure 1 → Leaderboard → dataset charts → Key findings → Case studies; research prose and case evidence come from the paper.
+Content organization draws on [SWE-CoWork](https://tokenwave-ai.github.io/swe-cowork-page/) and [OSWorld-Science](https://discoailab.github.io/osworld-science-page/). The page follows statistics → benchmark purpose and investigation challenges → Figure 1 → independent tasks → result summary and Leaderboard → film → dataset charts → Key findings → Case studies. The full abstract is available in a collapsed disclosure near the citation. Benchmark descriptions and result interpretations are grounded in the paper. Leaderboard values are centered, column maxima use compact badges, and the position column follows the active metric sort without introducing a composite score.
 
 Font sources: [Noto Sans SC / Google Fonts](https://fonts.google.com/noto/specimen/Noto+Sans+SC), with its OFL in `assets/fonts/OFL-NotoSansSC.txt`; [Franie Test terms](https://www.thatthattype.com/test-fonts). Local trial fonts were downloaded from the Franie package on Befonts and remain excluded from publication.
 
@@ -83,6 +83,6 @@ npm --prefix video ci
 npm --prefix video run render
 ```
 
-`video/render.mjs` controls timing, typography, diagrams and animation. `video/soundtrack.mjs` creates the original music and UI cues. The homepage embeds the film after Figure 1 with native controls, a poster and no autoplay. The Pages workflow publishes only the MP4 and poster from `video/`; the film is not posted to social media.
+`video/render.mjs` controls timing, typography, diagrams and animation. `video/soundtrack.mjs` creates the original music and UI cues. The homepage embeds the film after the Leaderboard with native controls, a poster and no autoplay. The Pages workflow publishes only the MP4 and poster from `video/`; the film is not posted to social media.
 
 Interactive presentation: tab indicators slide between selected buttons, panel changes fade in, and evidence/repository bars animate from zero. Animations respect reduced-motion preferences. RQ chart switches cover quality/localization, aggregate/per-model bug localization, function/hunk recall by defect type, test/localization mechanisms, and paired recall/precision. Mechanism shares are independent reported percentages, not a normalized partition.
